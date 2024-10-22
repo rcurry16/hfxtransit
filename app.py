@@ -136,6 +136,7 @@ async def generate_map(
                 'latitude': latitude,
                 'longitude': longitude,
                 'timestamp': bus.vehicle.timestamp,
+                'speed': bus.vehicle.position.speed,
                 'vehicle_label': label,
                 'occupancy_status': bus.vehicle.occupancy_status
             }
@@ -163,6 +164,7 @@ async def generate_map(
                     'latitude': latitude,
                     'longitude': longitude,
                     'timestamp': bus.vehicle.timestamp,
+                    'speed': bus.vehicle.position.speed,
                     'vehicle_label': label,
                     'occupancy_status': bus.vehicle.occupancy_status
                 }
@@ -190,6 +192,7 @@ async def generate_map(
                     'latitude': latitude,
                     'longitude': longitude,
                     'timestamp': bus.vehicle.timestamp,
+                    'speed': bus.vehicle.position.speed,
                     'vehicle_label': label,
                     'occupancy_status': bus.vehicle.occupancy_status
                 }
@@ -288,6 +291,7 @@ async def filter_buses(request: Request, lat: float = Form(...), lon: float = Fo
                 'longitude': longitude,
                 'distance_from_user_km': round(distance, 2),
                 'timestamp': bus.vehicle.timestamp,
+                'speed': bus.vehicle.position.speed,
                 'vehicle_label': label,
                 'occupancy_status': bus.vehicle.occupancy_status
             }
