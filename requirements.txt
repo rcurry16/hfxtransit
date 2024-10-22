@@ -5,3 +5,4 @@ gtfs-realtime-bindings==1.0.0  # For GTFS realtime protobuf
 requests==2.31.0  # For making HTTP requests
 folium==0.15.1  # For map generation
 uvicorn==0.27.0  # ASGI server to run FastAPI
+gunicorn==21.2.0  # Production-grade WSGI HTTP Server
