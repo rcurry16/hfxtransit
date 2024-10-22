@@ -1,0 +1,67 @@
+[
+    {
+        "bus_id": "1124",
+        "trip_id": "2684787",
+        "start_date": "20241015",
+        "route_id": "90",
+        "latitude": 44.64950942993164,
+        "longitude": -63.57313919067383,
+        "bearing": 315.0,
+        "speed": 0.0,
+        "timestamp": 1729005835,
+        "vehicle_label": "1124",
+        "occupancy_status": 7
+    },
+    {
+        "bus_id": "1160",
+        "trip_id": "2684789",
+        "start_date": "20241015",
+        "route_id": "90",
+        "latitude": 44.72391128540039,
+        "longitude": -63.7040901184082,
+        "bearing": 270.0,
+        "speed": 2.2351999282836914,
+        "timestamp": 1729005841,
+        "vehicle_label": "1160",
+        "occupancy_status": 7
+    },
+    {
+        "bus_id": "1271",
+        "trip_id": "2684753",
+        "start_date": "20241015",
+        "route_id": "90",
+        "latitude": 44.688968658447266,
+        "longitude": -63.659339904785156,
+        "bearing": 0.0,
+        "speed": 15.646400451660156,
+        "timestamp": 1729005822,
+        "vehicle_label": "1271",
+        "occupancy_status": 7
+    },
+    {
+        "bus_id": "1305",
+        "trip_id": "2684754",
+        "start_date": "20241015",
+        "route_id": "90",
+        "latitude": 44.63949966430664,
+        "longitude": -63.580810546875,
+        "bearing": 270.0,
+        "speed": 6.705599784851074,
+        "timestamp": 1729005838,
+        "vehicle_label": "1305",
+        "occupancy_status": 7
+    },
+    {
+        "bus_id": "1344",
+        "trip_id": "2684788",
+        "start_date": "20241015",
+        "route_id": "90",
+        "latitude": 44.64772033691406,
+        "longitude": -63.5908088684082,
+        "bearing": 180.0,
+        "speed": 4.470399856567383,
+        "timestamp": 1729005823,
+        "vehicle_label": "1344",
+        "occupancy_status": 7
+    }
+]
