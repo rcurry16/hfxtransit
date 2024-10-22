@@ -1,0 +1,7 @@
+fastapi==0.109.1
+python-multipart==0.0.9  # Required for Form data processing
+jinja2==3.1.3  # Required for templates
+gtfs-realtime-bindings==1.0.0  # For GTFS realtime protobuf
+requests==2.31.0  # For making HTTP requests
+folium==0.15.1  # For map generation
+uvicorn==0.27.0  # ASGI server to run FastAPI
