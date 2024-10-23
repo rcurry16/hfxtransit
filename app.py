@@ -15,6 +15,9 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+# In your main app.py, add:
+@app.mount("/fpl", fpl_app)  # Mount the FPL app as a sub-application
+
 # Update your routes
 @app.get("/")
 async def landing_page(request: Request):
