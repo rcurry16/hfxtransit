@@ -15,11 +15,6 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-
-@app.get("/", response_class=HTMLResponse)
-async def get_form(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
 # Update your routes
 @app.get("/")
 async def landing_page(request: Request):
