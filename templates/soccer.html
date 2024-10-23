@@ -1,1 +1,117 @@
-/
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL Stats Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>FPL Stats Dashboard</h1>
+            <div class="grid">
+                <div class="card">
+                    <h2>Top Performers</h2>
+                    <div id="topPerformers"></div>
+                </div>
+                <div class="card">
+                    <h2>Best Value Picks</h2>
+                    <div id="valuePicks"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            // Fetch top performers
+            const topPerformersResponse = await fetch('/api/top-performers');
+            const topPerformers = await topPerformersResponse.json();
+            displayPlayers('topPerformers', topPerformers, ['player_name', 'team_name', 'total_points']);
+
+            // Fetch value picks
+            const valuePicksResponse = await fetch('/api/value-picks');
+            const valuePicks = await valuePicksResponse.json();
+            displayPlayers('valuePicks', valuePicks, ['player_name', 'team_name', 'value_score']);
+        }
+
+        function displayPlayers(elementId, players, columns) {
+            const table = document.createElement('table');
+            
+            // Create header
+            const header = document.createElement('tr');
+            columns.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column.replace('_', ' ').toUpperCase();
+                header.appendChild(th);
+            });
+            table.appendChild(header);
+
+            // Create rows
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                columns.forEach(column => {
+                    const td = document.createElement('td');
+                    td.textContent = player[column];
+                    row.appendChild(td);
+                });
+                table.appendChild(row);
+            });
+
+            document.getElementById(elementId).appendChild(table);
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
