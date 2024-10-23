@@ -53,12 +53,31 @@
         .button:hover {
             background-color: #2980b9;
         }
+        .filters {
+            margin-bottom: 20px;
+        }
+        .error {
+            color: red;
+            padding: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
             <h1>FPL Stats Dashboard</h1>
+            <div class="filters">
+                <select id="positionFilter">
+                    <option value="">All Positions</option>
+                    <option value="GKP">Goalkeeper</option>
+                    <option value="DEF">Defender</option>
+                    <option value="MID">Midfielder</option>
+                    <option value="FWD">Forward</option>
+                </select>
+                <button class="button" onclick="applyFilters()">Apply Filters</button>
+            </div>
+            <div id="error" class="error"></div>
             <div class="grid">
                 <div class="card">
                     <h2>Top Performers</h2>
@@ -71,18 +90,41 @@
             </div>
         </div>
     </div>
-
     <script>
-        async function fetchData() {
-            // Fetch top performers
-            const topPerformersResponse = await fetch('/api/top-performers');
-            const topPerformers = await topPerformersResponse.json();
-            displayPlayers('topPerformers', topPerformers, ['player_name', 'team_name', 'total_points']);
+        async function fetchData(position = '') {
+            try {
+                document.getElementById('error').style.display = 'none';
+                
+                // Clear existing tables
+                document.getElementById('topPerformers').innerHTML = '';
+                document.getElementById('valuePicks').innerHTML = '';
 
-            // Fetch value picks
-            const valuePicksResponse = await fetch('/api/value-picks');
-            const valuePicks = await valuePicksResponse.json();
-            displayPlayers('valuePicks', valuePicks, ['player_name', 'team_name', 'value_score']);
+                // Fetch top performers
+                const topPerformersUrl = `/fpl/api/top-performers${position ? `?position=${position}` : ''}`;
+                const topPerformersResponse = await fetch(topPerformersUrl);
+                const topPerformers = await topPerformersResponse.json();
+                displayPlayers('topPerformers', topPerformers, [
+                    { key: 'web_name', label: 'Player' },
+                    { key: 'name', label: 'Team' },
+                    { key: 'total_points', label: 'Points' },
+                    { key: 'now_cost', label: 'Price' }
+                ]);
+
+                // Fetch value picks
+                const valuePicksUrl = `/fpl/api/value-picks${position ? `?position=${position}` : ''}`;
+                const valuePicksResponse = await fetch(valuePicksUrl);
+                const valuePicks = await valuePicksResponse.json();
+                displayPlayers('valuePicks', valuePicks, [
+                    { key: 'web_name', label: 'Player' },
+                    { key: 'name', label: 'Team' },
+                    { key: 'value_score', label: 'Value Score' },
+                    { key: 'now_cost', label: 'Price' }
+                ]);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('error').textContent = 'Error loading data. Please try again later.';
+                document.getElementById('error').style.display = 'block';
+            }
         }
 
         function displayPlayers(elementId, players, columns) {
@@ -92,7 +134,7 @@
             const header = document.createElement('tr');
             columns.forEach(column => {
                 const th = document.createElement('th');
-                th.textContent = column.replace('_', ' ').toUpperCase();
+                th.textContent = column.label;
                 header.appendChild(th);
             });
             table.appendChild(header);
@@ -102,15 +144,30 @@
                 const row = document.createElement('tr');
                 columns.forEach(column => {
                     const td = document.createElement('td');
-                    td.textContent = player[column];
+                    let value = player[column.key];
+                    
+                    // Format values
+                    if (column.key === 'now_cost') {
+                        value = `£${(value / 10).toFixed(1)}m`;
+                    } else if (column.key === 'value_score') {
+                        value = value.toFixed(2);
+                    }
+                    
+                    td.textContent = value;
                     row.appendChild(td);
                 });
                 table.appendChild(row);
             });
-
+            
             document.getElementById(elementId).appendChild(table);
         }
 
+        function applyFilters() {
+            const position = document.getElementById('positionFilter').value;
+            fetchData(position);
+        }
+
+        // Initial load
         fetchData();
     </script>
 </body>
