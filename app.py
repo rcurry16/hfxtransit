@@ -20,6 +20,21 @@ templates = Jinja2Templates(directory="templates")
 async def get_form(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# Update your routes
+@app.get("/")
+async def landing_page(request: Request):
+    return templates.TemplateResponse("landing.html", {"request": request})
+
+# Rename your existing route to /bus
+@app.get("/bus")
+async def get_bus_tracker(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+# Placeholder route for the future soccer project
+@app.get("/soccer")
+async def get_soccer_project(request: Request):
+    return templates.TemplateResponse("soccer.html", {"request": request})
+
 @app.post("/generate_map", response_class=HTMLResponse)
 async def generate_map(
     request: Request, 
