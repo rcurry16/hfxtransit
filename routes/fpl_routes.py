@@ -100,4 +100,41 @@ async def get_value_picks(min_minutes: int = 90, limit: int = 10):
     df['value_score'] = df['total_points'] / df['now_cost']
     
     return df.nlargest(limit, 'value_score').to_dict(orient='records')
-  
+
+@router.get("/api/league-standings")
+async def get_league_standings():
+    data = await fetch_fpl_data("league")
+    return data['standings']['results']
+
+@router.get("/api/manager-history")
+async def get_manager_history():
+    # First get the league standings to get manager IDs
+    league_data = await fetch_fpl_data("league")
+    manager_ids = [manager['entry'] for manager in league_data['standings']['results']]
+    
+    # Fetch history for each manager
+    all_histories = []
+    for manager_id in manager_ids:
+        try:
+            response = requests.get(f"https://fantasy.premierleague.com/api/entry/{manager_id}/history/")
+            response.raise_for_status()
+            history = response.json()
+            
+            # Process the current history
+            current = history['current']
+            for gw in current:
+                all_histories.append({
+                    'gameweek': gw['event'],
+                    'points': gw['points'],
+                    'total_points': gw['total_points'],
+                    'manager_id': manager_id
+                })
+        except requests.RequestException as e:
+            print(f"Error fetching history for manager {manager_id}: {e}")
+            continue
+    
+    # Transform data for the chart
+    df = pd.DataFrame(all_histories)
+    pivot_df = df.pivot(index='gameweek', columns='manager_id', values='total_points').reset_index()
+    
+    return pivot_df.to_dict('records')
