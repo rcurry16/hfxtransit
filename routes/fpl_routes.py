@@ -101,40 +101,59 @@ async def get_value_picks(min_minutes: int = 90, limit: int = 10):
     
     return df.nlargest(limit, 'value_score').to_dict(orient='records')
 
-@router.get("/api/league-standings")
-async def get_league_standings():
-    data = await fetch_fpl_data("league")
-    return data['standings']['results']
+# Add to your existing fpl_routes.py
 
-@router.get("/api/manager-history")
-async def get_manager_history():
-    # First get the league standings to get manager IDs
+@router.get("/league")
+async def get_league_page(request: Request):
+    try:
+        league_data = await fetch_fpl_data("league")
+        standings = league_data['standings']['results']
+        
+        # Get manager histories
+        manager_histories = []
+        for manager in standings[:10]:  # Limit to top 10 to avoid too many requests
+            manager_id = manager['entry']
+            try:
+                response = requests.get(f"https://fantasy.premierleague.com/api/entry/{manager_id}/history/")
+                response.raise_for_status()
+                history = response.json()
+                manager['history'] = history['current']
+            except requests.RequestException as e:
+                print(f"Error fetching history for manager {manager_id}: {e}")
+                manager['history'] = []
+                
+        return templates.TemplateResponse(
+            "league.html", 
+            {
+                "request": request,
+                "standings": standings,
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/api/league/history")
+async def get_league_history():
+    """API endpoint to get historical data for the league chart"""
     league_data = await fetch_fpl_data("league")
-    manager_ids = [manager['entry'] for manager in league_data['standings']['results']]
+    standings = league_data['standings']['results']
     
-    # Fetch history for each manager
-    all_histories = []
-    for manager_id in manager_ids:
+    manager_histories = []
+    for manager in standings[:10]:  # Limit to top 10
+        manager_id = manager['entry']
         try:
             response = requests.get(f"https://fantasy.premierleague.com/api/entry/{manager_id}/history/")
             response.raise_for_status()
             history = response.json()
             
-            # Process the current history
-            current = history['current']
-            for gw in current:
-                all_histories.append({
-                    'gameweek': gw['event'],
-                    'points': gw['points'],
-                    'total_points': gw['total_points'],
-                    'manager_id': manager_id
-                })
+            # Add manager info to each gameweek
+            for gw in history['current']:
+                gw['manager_name'] = manager['player_name']
+                gw['manager_id'] = manager_id
+            
+            manager_histories.extend(history['current'])
         except requests.RequestException as e:
             print(f"Error fetching history for manager {manager_id}: {e}")
-            continue
+            
+    return manager_histories
     
-    # Transform data for the chart
-    df = pd.DataFrame(all_histories)
-    pivot_df = df.pivot(index='gameweek', columns='manager_id', values='total_points').reset_index()
-    
-    return pivot_df.to_dict('records')
