@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">League Standings</h1>
+    
+    <!-- League Table -->
+    <div class="bg-white rounded-lg shadow mb-8">
+        <table class="min-w-full">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-6 py-3 text-left">Rank</th>
+                    <th class="px-6 py-3 text-left">Manager</th>
+                    <th class="px-6 py-3 text-right">GW</th>
+                    <th class="px-6 py-3 text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for manager in standings %}
+                <tr class="border-t">
+                    <td class="px-6 py-4">{{ loop.index }}</td>
+                    <td class="px-6 py-4">{{ manager.player_name }}</td>
+                    <td class="px-6 py-4 text-right">{{ manager.event_total }}</td>
+                    <td class="px-6 py-4 text-right">{{ manager.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Points Chart -->
+    <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-xl font-bold mb-4">Points Progress</h2>
+        <canvas id="pointsChart" height="400"></canvas>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+
+<script>
+async function initChart() {
+    // Fetch historical data
+    const response = await fetch('/fpl/api/league/history');
+    const data = await response.json();
+    
+    // Process data for chart
+    const gameweeks = [...new Set(data.map(d => d.event))].sort((a, b) => a - b);
+    const managers = [...new Set(data.map(d => d.manager_name))];
+    
+    const datasets = managers.map((manager, index) => {
+        const managerData = data.filter(d => d.manager_name === manager);
+        return {
+            label: manager,
+            data: managerData.map(d => d.total_points),
+            borderColor: `hsl(${(index * 360) / managers.length}, 70%, 50%)`,
+            fill: false,
+            tension: 0.1
+        };
+    });
+
+    // Create chart
+    const ctx = document.getElementById('pointsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: gameweeks.map(gw => `GW${gw}`),
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 20
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Total Points'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Gameweek'
+                    }
+                }
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initChart);
+</script>
+{% endblock %}
